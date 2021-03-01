@@ -6,7 +6,7 @@
     3. [Адресация](#addressing)
     4. [Арифметические операции](#arithmetics)
     5. [Операции сравнения](#comparison)
-## compilation <a name="compilation"></a>
+## Компиляция <a name="compilation"></a>
 ### Makefile
 * make all или make - компиляция статической библиотеки libSparseMatrix.a
 * make clean - удалить все промежуточные файлы компиляции
@@ -18,4 +18,3 @@
 ## Описание класса <a name="class_description"></a>
 Класс `SparseMatrix` реализует разреженную матрицу на базе красно-чёрного дерева (`class RBTree`).
 ### Конструктор <a name="constructor">
-
