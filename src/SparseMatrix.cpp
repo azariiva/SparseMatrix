@@ -1,11 +1,11 @@
 #include "SparseMatrix.hpp"
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 
 void SparseMatrix::set_precision(double ueps) {
     if (SparseMatrix::instance_quantity != 0) {
-        // TODO: raise error
-        std::cerr << "Can't modify precision when instances exist" << std::endl;
+        throw std::runtime_error("SparseMatrix::set_precision : precision could not be modified when instances of SparseMatrix exist");
     } else {
         SparseMatrix::eps = ueps;
     }
@@ -34,7 +34,7 @@ SparseMatrix::~SparseMatrix() {
 }
 
 SparseMatrix& SparseMatrix::operator=(const SparseMatrix& src) {
-    if (*this == src) {
+    if (this == &src) {
         return *this;
     }
     height = src.height;
@@ -47,9 +47,7 @@ double SparseMatrix::get(size_t urow, size_t column) const {
     Node<MatrixIndex, double> *node;
 
     if (urow >= height || column >= width) {
-        //TODO: raise error
-        std::cerr << "Out of bounds" << std::endl;
-        return 0.0;
+        throw std::out_of_range("SparseMatrix::get : out of bounds exception(height or width exceeded)");
     }
     node = tree.get_node(MatrixIndex(urow, column));
     if (node == RBTree<MatrixIndex, double>::nil_node) {
@@ -60,9 +58,7 @@ double SparseMatrix::get(size_t urow, size_t column) const {
 
 void SparseMatrix::set(size_t urow, size_t column, double val) {
     if (urow >= height || column >= width) {
-        // TODO: raise error
-        std::cerr << "Out of bounds" << std::endl;
-        return ;
+        throw std::out_of_range("SparseMatrix::set : out of bounds exception(height or width exceeded)");
     }
     if (fabs(val - 0.0) <= SparseMatrix::eps) {
         tree.remove(MatrixIndex(urow, column));
@@ -81,32 +77,28 @@ size_t SparseMatrix::num_columns() const {
 
 SparseMatrixRow SparseMatrix::operator[](size_t urow) {
      if (row + urow >= height) {
-        // TODO: raise error
-        std::cerr << "Out of bounds exception: height exceeded(" << row + urow << ")" << std::endl;
+        throw std::out_of_range("SparseMatrix::operator[] : out of bounds exception(height exceeded)");
     }
     return SparseMatrixRow(this, row + urow);
 }
 
 SparseMatrixRow SparseMatrix::operator[](size_t urow) const {
     if (row + urow >= height) {
-        // TODO: raise error
-        std::cerr << "Out of bounds exception: height exceeded(" << row + urow << ")" << std::endl;
+        throw std::out_of_range("SparseMatrix::operator[] : out of bounds exception(height exceeded)");
     }
     return SparseMatrixRow(const_cast<SparseMatrix *>(this), row + urow, false);
 }
 
 SparseMatrixRow SparseMatrix::operator*() {
     if (row >= height) {
-        // TODO: raise error
-        std::cerr << "Out of bounds exception: height exceeded(" << row << ")" << std::endl;
+        throw std::out_of_range("SparseMatrix::operator* : out of bounds exception(height exceeded)");
     }
     return SparseMatrixRow(this, row);
 }
 
 SparseMatrixRow SparseMatrix::operator*() const {
     if (row >= height) {
-        // TODO: raise error
-        std::cerr << "Out of bounds exception: height exceeded(" << row << ")" << std::endl;
+        throw std::out_of_range("SparseMatrix::operator* : out of bounds exception(height exceeded)");
     }
     return SparseMatrixRow(const_cast<SparseMatrix *>(this), row, false);
 }
@@ -134,8 +126,7 @@ const SparseMatrix& SparseMatrix::operator-(size_t urow) const {
 SparseMatrix& SparseMatrix::perform_operation(void (*op)(double&,double), const SparseMatrix&rv) {
     // TODO: optimize a little
     if (height != rv.height || width != rv.width) {
-        // TODO: raise error
-        std::cerr << "ValueError: operands could not be broadcast together" << std::endl;
+        throw std::invalid_argument("SparseMatrix::perform_operation : operands could not be broadcast together");
     }
     for (size_t row_ = 0; row_ < height; row_++) {
         for (size_t column = 0; column < width; column++) {
@@ -193,7 +184,7 @@ SparseMatrix SparseMatrix::dot(const SparseMatrix& rv) const {
     SparseMatrix m(height, rv.width);
 
     if (width != rv.height) {
-        std::cerr << "ValueError: operands could not be broadcast together" << std::endl;
+        throw std::invalid_argument("SparseMatrix::dot : operands could not be broadcast together");
     }
     for (size_t row_ = 0; row_ < height; row_++) {
         for (size_t column = 0; column < rv.width; column++) {
@@ -278,8 +269,7 @@ SparseMatrixRow& SparseMatrixRow::operator-(size_t rv) {
 SparseMatrixRowProxy SparseMatrixRow::operator[](size_t ucolumn) {
     column += ucolumn;
     if (column >= m->width) {
-        // TODO: raise error
-        std::cerr << "Out of bounds exception: width exceeded" << std::endl;
+        throw std::out_of_range("SparseMatrixRow::operator[] : out of bounds exception(width exceeded)");
     }
     node = m->tree.get_node(MatrixIndex(row, column));
     return SparseMatrixRowProxy(this);
@@ -287,8 +277,7 @@ SparseMatrixRowProxy SparseMatrixRow::operator[](size_t ucolumn) {
 
 SparseMatrixRowProxy SparseMatrixRow::operator*() {
      if (column >= m->width) {
-        // TODO: raise error
-        std::cerr << "Out of bounds exception: width exceeded" << std::endl;
+        throw std::out_of_range("SparseMatrixRow::operator* : out of bounds exception(width exceeded)");
     }
     node = m->tree.get_node(MatrixIndex(row, column));
     return SparseMatrixRowProxy(this);
@@ -300,9 +289,7 @@ SparseMatrixRowProxy::SparseMatrixRowProxy(SparseMatrixRow *ureal) {
 
 SparseMatrixRowProxy& SparseMatrixRowProxy::operator=(double val) {
     if (real->modifyable == false) {
-        // TODO: raise error
-        std::cerr << "Can't modify constant matrix" << std::endl;
-        return *this;
+        throw std::runtime_error("SparseMatrixRowProxy::operator= : constant instance could not be modified");
     }
     if (real->node == Node<MatrixIndex,double>::nil_node) {
         if (fabs(val - 0.0) > SparseMatrix::eps) {
@@ -320,14 +307,13 @@ SparseMatrixRowProxy& SparseMatrixRowProxy::operator=(double val) {
 }
 
 SparseMatrixRowProxy& SparseMatrixRowProxy::operator=(const SparseMatrixRowProxy& rv) {
-    if (*this == rv) {
+    if (this == &rv) {
         return *this;
     }
     return operator=(double(rv));
 }
 
 SparseMatrixRowProxy::operator double() const {
-    // std::cout << "(" << real->row << ' ' << real->column << ")";
     if (real->node == Node<MatrixIndex,double>::nil_node) {
         return 0.0;
     }
@@ -341,6 +327,9 @@ SparseMatrixRowProxy& SparseMatrixRowProxy::perform_operation(void (*op)(double&
     bool node_exist = (real->node != Node<MatrixIndex,double>::nil_node);
     double tmp = (node_exist ? real->node->item : 0.0);
 
+    if (real->modifyable == false) {
+        throw std::runtime_error("SparseMatrixRowProxy::perform_operation : constant instance could not be modified");
+    }
     op(tmp, rv);
     if (fabs(tmp - 0.0) > SparseMatrix::eps) {
         if (node_exist) {

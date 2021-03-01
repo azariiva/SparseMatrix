@@ -79,10 +79,10 @@ class SparseMatrixRow
     Node<MatrixIndex,double>    *node;
 
     friend SparseMatrixRowProxy;
-    friend SparseMatrixRow SparseMatrixRow::operator[](size_t);
-    friend SparseMatrixRow SparseMatrixRow::operator[](size_t) const;
-    friend SparseMatrixRow SparseMatrixRow::operator*();
-    friend SparseMatrixRow SparseMatrixRow::operator*() const;
+    friend SparseMatrixRow SparseMatrix::operator[](size_t);
+    friend SparseMatrixRow SparseMatrix::operator[](size_t) const;
+    friend SparseMatrixRow SparseMatrix::operator*();
+    friend SparseMatrixRow SparseMatrix::operator*() const;
 
     SparseMatrixRow(SparseMatrix *, size_t, bool = true);
     
@@ -97,8 +97,8 @@ class SparseMatrixRowProxy
 {
     SparseMatrixRow   *real;
 
-    friend SparseMatrixRowProxy SparseMatrixRowProxy::operator[](size_t);
-    friend SparseMatrixRowProxy SparseMatrixRowProxy::operator*();
+    friend SparseMatrixRowProxy SparseMatrixRow::operator[](size_t);
+    friend SparseMatrixRowProxy SparseMatrixRow::operator*();
 
     SparseMatrixRowProxy(SparseMatrixRow *);
 

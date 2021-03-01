@@ -14,12 +14,13 @@
 
 ## Компиляция <a name="compilation"></a>
 ### Makefile
-* make all или make - компиляция статической библиотеки libSparseMatrix.a
+* make all или make - компиляция статической библиотеки SparseMatrix.a
 * make clean - удалить все промежуточные файлы компиляции
-* make fclean - удалить все промежуточные файлы компиляции и libSparseMatrix.a
+* make fclean - удалить все промежуточные файлы компиляции и SparseMatrix.a
+* make tests - скомпилировать файлы с тестами
 * make re - полностью перекомпилировать проект
 ### Использование библиотеки <a name="lib_usage"></a>
-При компиляции добавьте `-L headers -lSparseMatrix`
+При компиляции добавьте `-I headers -L. <your files> -lSparseMatrix`
 
 ## Описание класса <a name="class_description"></a>
 Класс `SparseMatrix` реализует разреженную матрицу на базе красно-чёрного дерева (`class RBTree`). <br>
@@ -60,3 +61,6 @@ SparseMatrix m(10, 10);
 ### SparseMatrixRowProxy
 Является прокси для доступа к элементам матрицы. Порождается `SparseMatrixRow::operator[]`, `SparseMatrixRow::operator*`. <br>
 Поле `real` указывает на строку, породившую объект.
+
+## Примечания
+Тесты ещё не готовы и Makefile не идеальный

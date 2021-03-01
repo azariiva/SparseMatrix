@@ -7,11 +7,14 @@
             "args": [
                 "-std=gnu++0x",
                 "-g",
+                "-I${fileDirname}/../headers",
+                "-ftrapv",
+                "-fsanitize=undefined",
+                "-fsanitize=address",
                 "${file}",
-                "${fileDirname}/RBTree.cpp",
+                "${fileDirname}/../src/*.cpp",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
-                "-I."
+                "${fileDirname}/${fileBasenameNoExtension}"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
