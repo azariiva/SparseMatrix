@@ -23,6 +23,9 @@ SparseMatrix::SparseMatrix(const SparseMatrix& src) : tree(src.tree) {
 }
 
 SparseMatrix& SparseMatrix::operator=(const SparseMatrix& src) {
+    if (*this == src) {
+        return *this;
+    }
     height = src.height;
     width = src.width;
     tree = src.tree;
@@ -306,6 +309,9 @@ SparseArrayProxy& SparseArrayProxy::operator=(double val) {
 }
 
 SparseArrayProxy& SparseArrayProxy::operator=(const SparseArrayProxy& rv) {
+    if (*this == rv) {
+        return *this;
+    }
     return operator=(double(rv));
 }
 

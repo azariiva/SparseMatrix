@@ -87,6 +87,9 @@ RBTree<T_KEY, T_ITEM>::~RBTree() {
 
 template <class T_KEY, class T_ITEM>
 RBTree<T_KEY, T_ITEM>& RBTree<T_KEY, T_ITEM>::operator=(const RBTree& src) {
+    if (*this == src) {
+        return *this;
+    }
     if (root != nil_node) {
         delete_node(root);
     }

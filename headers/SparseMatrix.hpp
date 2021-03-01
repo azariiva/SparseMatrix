@@ -45,18 +45,23 @@ class SparseMatrix
     bool operator==(const SparseMatrix&) const; // after indexation
     bool operator!=(const SparseMatrix&) const; // after indexation
 
+    /*
+    ** Арифметические операции вида SparseMatrix.op(SparseMatrix)
+    */
     SparseMatrix& perform_operation(void (*)(double&,double), const SparseMatrix&);
     SparseMatrix& operator+=(const SparseMatrix&);
     SparseMatrix& operator-=(const SparseMatrix&);
     SparseMatrix& operator*=(const SparseMatrix&);
     SparseMatrix& operator/=(const SparseMatrix&);
-
     SparseMatrix operator+(const SparseMatrix&) const;
     SparseMatrix operator-(const SparseMatrix&) const;
     SparseMatrix operator*(const SparseMatrix&) const;
     SparseMatrix operator/(const SparseMatrix&) const;
     SparseMatrix dot(const SparseMatrix&) const;
 
+    /*
+    ** Арифметические операции вида SparseMatrix.op(double)
+    */
     SparseMatrix& operator*=(double val);
     SparseMatrix& operator/=(double val);
     SparseMatrix operator*(double val) const;

@@ -11,20 +11,26 @@ MatrixIndex::MatrixIndex(const MatrixIndex& src) {
 }
 
 MatrixIndex& MatrixIndex::operator=(const MatrixIndex& rv) {
+    if (rv == *this) {
+        return (*this);
+    }
     row = rv.row;
     column = rv.column;
     return *this;
 }
 
 bool MatrixIndex::operator==(const MatrixIndex& rv) const {
-    return (row == rv.row && column == rv.column);
+    return (rv == *this || (row == rv.row && column == rv.column));
 }
 
 bool MatrixIndex::operator!=(const MatrixIndex& rv) const {
-    return (row != rv.row || column != rv.column);
+    return (rv != *this && (row != rv.row || column != rv.column));
 }
 
 bool MatrixIndex::operator>(const MatrixIndex& rv) const {
+    if (rv == *this) {
+        return false;
+    }
     if (row > rv.row) {
         return true;
     } else if (row < rv.row) {
@@ -36,6 +42,9 @@ bool MatrixIndex::operator>(const MatrixIndex& rv) const {
 }
 
 bool MatrixIndex::operator<(const MatrixIndex& rv) const {
+    if (rv == *this) {
+        return false;
+    }
     if (row < rv.row) {
         return true;
     } else if (row > rv.row) {
@@ -47,6 +56,9 @@ bool MatrixIndex::operator<(const MatrixIndex& rv) const {
 }
 
 bool MatrixIndex::operator<=(const MatrixIndex& rv) const {
+    if (rv == *this) {
+        return true;
+    }
     if (row <= rv.row) {
         return true;
     } else if (row > rv.row) {
@@ -58,6 +70,9 @@ bool MatrixIndex::operator<=(const MatrixIndex& rv) const {
 }
 
 bool MatrixIndex::operator>=(const MatrixIndex& rv) const {
+    if (rv == *this) {
+        return true;
+    }
     if (row >= rv.row) {
         return true;
     } else if (row < rv.row) {
