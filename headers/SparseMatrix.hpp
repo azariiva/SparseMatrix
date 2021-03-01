@@ -4,27 +4,29 @@
 #include "MatrixIndex.hpp"
 #include "RBTree.hpp"
 
-class SparseArrayProxy;
-class SparseArray;
+class SparseMatrixRowProxy;
+class SparseMatrixRow;
 
 class SparseMatrix
 {
     static double               eps;
+    static size_t               instance_quantity;
+
     RBTree<MatrixIndex, double> tree;
     size_t                      height; 
     size_t                      width;
     size_t                      row;
 
-    public:
-    friend SparseArray;
-    friend SparseArrayProxy;
+    friend SparseMatrixRow;
+    friend SparseMatrixRowProxy;
 
+    public:
     static void set_precision(double);
     static double get_precision();
 
     SparseMatrix(size_t, size_t);
     SparseMatrix(const SparseMatrix&);
-    // ~SparseMatrix(); no need
+    ~SparseMatrix();
     SparseMatrix& operator=(const SparseMatrix&);
 
     double get(size_t, size_t) const;
@@ -33,10 +35,10 @@ class SparseMatrix
     size_t num_rows() const;
     size_t num_columns() const;
 
-    SparseArray operator[](size_t);
-    SparseArray operator[](size_t) const;
-    SparseArray operator*();
-    SparseArray operator*() const;
+    SparseMatrixRow operator[](size_t);
+    SparseMatrixRow operator[](size_t) const;
+    SparseMatrixRow operator*();
+    SparseMatrixRow operator*() const;
     SparseMatrix& operator+(size_t);
     const SparseMatrix& operator+(size_t) const;
     SparseMatrix& operator-(size_t);
@@ -68,44 +70,52 @@ class SparseMatrix
     SparseMatrix operator/(double val) const;
 };
 
-class SparseArray
+class SparseMatrixRow
 {
-    bool            modifyable;
-    size_t          row;
-    size_t          column;
-    SparseMatrix    *m;
+    bool                        modifyable;
+    size_t                      row;
+    size_t                      column;
+    SparseMatrix                *m;
+    Node<MatrixIndex,double>    *node;
 
-    Node<MatrixIndex,double> *node;
+    friend SparseMatrixRowProxy;
+    friend SparseMatrixRow SparseMatrixRow::operator[](size_t);
+    friend SparseMatrixRow SparseMatrixRow::operator[](size_t) const;
+    friend SparseMatrixRow SparseMatrixRow::operator*();
+    friend SparseMatrixRow SparseMatrixRow::operator*() const;
+
+    SparseMatrixRow(SparseMatrix *, size_t, bool = true);
     
     public:
-    friend SparseArrayProxy;
-    SparseArray(SparseMatrix *, size_t, bool = true);
-
-    SparseArray& operator+(size_t);
-    SparseArray& operator-(size_t);
-    SparseArrayProxy operator[](size_t);
-    SparseArrayProxy operator*();
+    SparseMatrixRow& operator+(size_t);
+    SparseMatrixRow& operator-(size_t);
+    SparseMatrixRowProxy operator[](size_t);
+    SparseMatrixRowProxy operator*();
 };
 
-class SparseArrayProxy
+class SparseMatrixRowProxy
 {
-    SparseArray   *real;
+    SparseMatrixRow   *real;
+
+    friend SparseMatrixRowProxy SparseMatrixRowProxy::operator[](size_t);
+    friend SparseMatrixRowProxy SparseMatrixRowProxy::operator*();
+
+    SparseMatrixRowProxy(SparseMatrixRow *);
 
     public:
-    SparseArrayProxy(SparseArray *);
-    SparseArrayProxy& operator=(double);
-    SparseArrayProxy& operator=(const SparseArrayProxy&);
+    SparseMatrixRowProxy& operator=(double);
+    SparseMatrixRowProxy& operator=(const SparseMatrixRowProxy&);
     
-    SparseArrayProxy& perform_operation(void (*)(double&,double), double);
-    SparseArrayProxy& operator+=(double);
-    SparseArrayProxy& operator-=(double);
-    SparseArrayProxy& operator*=(double);
-    SparseArrayProxy& operator/=(double);
+    SparseMatrixRowProxy& perform_operation(void (*)(double&,double), double);
+    SparseMatrixRowProxy& operator+=(double);
+    SparseMatrixRowProxy& operator-=(double);
+    SparseMatrixRowProxy& operator*=(double);
+    SparseMatrixRowProxy& operator/=(double);
 
-    bool operator==(double);
-    bool operator==(SparseArrayProxy&);
-    bool operator!=(double);
-    bool operator!=(SparseArrayProxy&);
+    bool operator==(double) const;
+    bool operator==(SparseMatrixRowProxy&) const;
+    bool operator!=(double) const;
+    bool operator!=(SparseMatrixRowProxy&) const;
 
     operator double() const;
 };
