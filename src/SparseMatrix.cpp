@@ -379,5 +379,17 @@ bool SparseMatrixRowProxy::operator!=(SparseMatrixRowProxy& rv) const {
     return (fabs(operator double() - double(rv)) >= SparseMatrix::eps);
 }
 
+SparseMatrixRow& operator+(size_t lv, const SparseMatrixRow& rv) {
+    return const_cast<SparseMatrixRow&>(rv).operator+(lv);
+}
+
+SparseMatrix& operator+(size_t lv, SparseMatrix& rv) {
+    return rv.operator+(lv);
+}
+
+const SparseMatrix& operator+(size_t lv, const SparseMatrix& rv) {
+    return rv.operator+(lv);
+}
+
 double SparseMatrix::eps  = 1e-8;
 size_t SparseMatrix::instance_quantity = 0;

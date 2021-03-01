@@ -24,9 +24,9 @@ int main() {
     try {
         for (size_t i = 0; i < mm.num_columns(); i++) {
             for (size_t j = 0; j < mm.num_rows(); j++) {
-                *(mm[i] + j) += *(mm[i] + j);
+                *(mm[i] + j) += (*(mm[i] + j) + 2 - 2);
                 *(mm[i] + j) /= 2;
-                *(mm[i] + j) *= *(mm[i] + j);
+                *(mm[i] + j) *= (2 + *(mm[i] + j) - 2);
             }
             std::cout << '\n';
         }
@@ -52,7 +52,7 @@ int main() {
     SparseMatrix mmm(1,1);
     mmm = mm;
     for (size_t i = 0; i < mmm.num_rows(); i++) {
-        std::cout << ((mmm[i] + i - 1)[1] -= 9) << ' ';
+        std::cout << ((1 + mmm[i] + i - 2)[1] -= 9) << ' ';
     }
     std::cout << "\n\n";
 

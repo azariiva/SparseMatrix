@@ -19,6 +19,8 @@ class SparseMatrix
 
     friend SparseMatrixRow;
     friend SparseMatrixRowProxy;
+    friend SparseMatrix& operator+(size_t, SparseMatrix&);
+    friend const SparseMatrix& operator+(size_t, const SparseMatrix&);
 
     public:
     static void set_precision(double);
@@ -83,6 +85,7 @@ class SparseMatrixRow
     friend SparseMatrixRow SparseMatrix::operator[](size_t) const;
     friend SparseMatrixRow SparseMatrix::operator*();
     friend SparseMatrixRow SparseMatrix::operator*() const;
+    friend SparseMatrixRow& operator+(size_t, const SparseMatrixRow&);
 
     SparseMatrixRow(SparseMatrix *, size_t, bool = true);
     
@@ -91,6 +94,7 @@ class SparseMatrixRow
     SparseMatrixRow& operator-(size_t);
     SparseMatrixRowProxy operator[](size_t);
     SparseMatrixRowProxy operator*();
+    
 };
 
 class SparseMatrixRowProxy
