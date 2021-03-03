@@ -391,5 +391,9 @@ const SparseMatrix& operator+(size_t lv, const SparseMatrix& rv) {
     return rv.operator+(lv);
 }
 
+SparseMatrix operator*(double lv, const SparseMatrix& rv) {
+    return rv.operator*(lv);
+}
+
 double SparseMatrix::eps  = 1e-8;
 size_t SparseMatrix::instance_quantity = 0;

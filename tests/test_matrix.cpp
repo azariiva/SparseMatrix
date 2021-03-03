@@ -84,5 +84,6 @@ int main() {
     m = m;
     std::cout << '\n';
     std::cout << **m << '\n';
+    m.set(5, 1, 1.0);
     return 0;
 }

@@ -21,7 +21,8 @@ class SparseMatrix
     friend SparseMatrixRowProxy;
     friend SparseMatrix& operator+(size_t, SparseMatrix&);
     friend const SparseMatrix& operator+(size_t, const SparseMatrix&);
-
+    friend SparseMatrix operator*(double, const SparseMatrix&);
+    
     public:
     static void set_precision(double);
     static double get_precision();
