@@ -15,12 +15,10 @@ class SparseMatrix
     RBTree<MatrixIndex, double> tree;
     size_t                      height; 
     size_t                      width;
-    size_t                      row;
 
-    friend SparseMatrixRow;
-    friend SparseMatrixRowProxy;
-    friend SparseMatrix& operator+(size_t, SparseMatrix&);
-    friend const SparseMatrix& operator+(size_t, const SparseMatrix&);
+    friend SparseMatrixProxy;
+    friend SparseMatrixProxy& operator+(size_t, SparseMatrix&);
+    friend const SparseMatrixProxy& operator+(size_t, const SparseMatrix&);
 
     public:
     static void set_precision(double);
@@ -37,17 +35,17 @@ class SparseMatrix
     size_t num_rows() const;
     size_t num_columns() const;
 
-    SparseMatrixRow operator[](size_t);
-    SparseMatrixRow operator[](size_t) const;
-    SparseMatrixRow operator*();
-    SparseMatrixRow operator*() const;
-    SparseMatrix& operator+(size_t);
-    const SparseMatrix& operator+(size_t) const;
-    SparseMatrix& operator-(size_t);
-    const SparseMatrix& operator-(size_t) const;
+    SparseMatrixProxy operator[](size_t);
+    SparseMatrixProxy operator[](size_t) const;
+    SparseMatrixProxy operator*();
+    SparseMatrixProxy operator*() const;
+    SparseMatrixProxy operator+(size_t);
+    SparseMatrixProxy operator+(size_t) const;
+    SparseMatrixProxy operator-(size_t);
+    SparseMatrixProxy operator-(size_t) const;
 
-    bool operator==(const SparseMatrix&) const; // after indexation
-    bool operator!=(const SparseMatrix&) const; // after indexation
+    bool operator==(const SparseMatrix&) const;
+    bool operator!=(const SparseMatrix&) const;
 
     /*
     ** Арифметические операции вида SparseMatrix.op(SparseMatrix)
@@ -72,56 +70,41 @@ class SparseMatrix
     SparseMatrix operator/(double val) const;
 };
 
-class SparseMatrixRow
-{
-    bool                        modifyable;
+class SparseMatrixProxy {
+    bool                        modifyable; // изменяемая ли матрица m
     size_t                      row;
-    size_t                      column;
+    size_t                      column; 
+    unsigned short              deref; // сколько произошло разыменований
+
     SparseMatrix                *m;
     Node<MatrixIndex,double>    *node;
+    size_t                      added; // это страшный костыль
 
-    friend SparseMatrixRowProxy;
-    friend SparseMatrixRow SparseMatrix::operator[](size_t);
-    friend SparseMatrixRow SparseMatrix::operator[](size_t) const;
-    friend SparseMatrixRow SparseMatrix::operator*();
-    friend SparseMatrixRow SparseMatrix::operator*() const;
-    friend SparseMatrixRow& operator+(size_t, const SparseMatrixRow&);
-
-    SparseMatrixRow(SparseMatrix *, size_t, bool = true);
-    
+    friend SparseMatrixProxy& operator+(size_t, SparseMatrixProxy&);
+    friend c
     public:
-    SparseMatrixRow& operator+(size_t);
-    SparseMatrixRow& operator-(size_t);
-    SparseMatrixRowProxy operator[](size_t);
-    SparseMatrixRowProxy operator*();
+    SparseMatrixProxy(SparseMatrix *, size_t, bool = false, bool = true);
+
+    SparseMatrixProxy& operator+(size_t);
+    SparseMatrixProxy& operator-(size_t);
+    SparseMatrixProxy operator[](size_t);
+    SparseMatrixProxy operator*();
     
-};
-
-class SparseMatrixRowProxy
-{
-    SparseMatrixRow   *real;
-
-    friend SparseMatrixRowProxy SparseMatrixRow::operator[](size_t);
-    friend SparseMatrixRowProxy SparseMatrixRow::operator*();
-
-    SparseMatrixRowProxy(SparseMatrixRow *);
-
-    public:
-    SparseMatrixRowProxy& operator=(double);
-    SparseMatrixRowProxy& operator=(const SparseMatrixRowProxy&);
+    SparseMatrixProxy& operator=(double);
+    SparseMatrixProxy& operator=(const SparseMatrixRowProxy&);
     
-    SparseMatrixRowProxy& perform_operation(void (*)(double&,double), double);
-    SparseMatrixRowProxy& operator+=(double);
-    SparseMatrixRowProxy& operator-=(double);
-    SparseMatrixRowProxy& operator*=(double);
-    SparseMatrixRowProxy& operator/=(double);
+    SparseMatrixProxy& perform_operation(void (*)(double&,double), double);
+    SparseMatrixProxy& operator+=(double);
+    SparseMatrixProxy& operator-=(double);
+    SparseMatrixProxy& operator*=(double);
+    SparseMatrixProxy& operator/=(double);
 
     bool operator==(double) const;
-    bool operator==(SparseMatrixRowProxy&) const;
+    bool operator==(SparseMatrixProxy&) const;
     bool operator!=(double) const;
-    bool operator!=(SparseMatrixRowProxy&) const;
+    bool operator!=(SparseMatrixProxy&) const;
 
     operator double() const;
-};
+}
 
 #endif

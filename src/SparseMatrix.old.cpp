@@ -75,36 +75,52 @@ size_t SparseMatrix::num_columns() const {
     return width;
 }
 
-SparseMatrixProxy SparseMatrix::operator[](size_t row) {
-    return SparseMatrixProxy(this, row, true);
+SparseMatrixRow SparseMatrix::operator[](size_t urow) {
+     if (row + urow >= height) {
+        throw std::out_of_range("SparseMatrix::operator[] : out of bounds exception(height exceeded)");
+    }
+    return SparseMatrixRow(this, row + urow);
 }
 
-SparseMatrixProxy SparseMatrix::operator[](size_t row) const {
-    return SparseMatrixRow(const_cast<SparseMatrix *>(this), row, true, false);
+SparseMatrixRow SparseMatrix::operator[](size_t urow) const {
+    if (row + urow >= height) {
+        throw std::out_of_range("SparseMatrix::operator[] : out of bounds exception(height exceeded)");
+    }
+    return SparseMatrixRow(const_cast<SparseMatrix *>(this), row + urow, false);
 }
 
-SparseMatrixProxy SparseMatrix::operator*() {
-    return SparseMatrixProxy(this, 0, true);
+SparseMatrixRow SparseMatrix::operator*() {
+    if (row >= height) {
+        throw std::out_of_range("SparseMatrix::operator* : out of bounds exception(height exceeded)");
+    }
+    return SparseMatrixRow(this, row);
 }
 
-SparseMatrixProxy SparseMatrix::operator*() const {
-    return SparseMatrixRow(const_cast<SparseMatrix *>(this), 0, false);
+SparseMatrixRow SparseMatrix::operator*() const {
+    if (row >= height) {
+        throw std::out_of_range("SparseMatrix::operator* : out of bounds exception(height exceeded)");
+    }
+    return SparseMatrixRow(const_cast<SparseMatrix *>(this), row, false);
 }
 
-SparseMatrixProxy SparseMatrix::operator+(size_t row) {
-    return SparseMatrixProxy(this, row);
+SparseMatrix& SparseMatrix::operator+(size_t urow) {
+    row += urow;
+    return *this;
 }
 
-SparseMatrixProxy SparseMatrix::operator+(size_t row) const {
-    return SparseMatrixRow(const_cast<SparseMatrix *>(this), row, false, false);
+const SparseMatrix& SparseMatrix::operator+(size_t urow) const {
+    const_cast<SparseMatrix *>(this)->row += urow;
+    return *this;
 }
 
-SparseMatrixProxy SparseMatrix::operator-(size_t row) {
-    return SparseMatrixProxy(this, -row);
+SparseMatrix& SparseMatrix::operator-(size_t urow) {
+    row -= urow;
+    return *this;
 }
 
-SparseMatrixProxy SparseMatrix::operator-(size_t row) const {
-    return SparseMatrixRow(const_cast<SparseMatrix *>(this), -row, false, false);
+const SparseMatrix& SparseMatrix::operator-(size_t urow) const {
+    const_cast<SparseMatrix *>(this)->row -= urow;
+    return *this;
 }
 
 SparseMatrix& SparseMatrix::perform_operation(void (*op)(double&,double), const SparseMatrix&rv) {
@@ -121,7 +137,7 @@ SparseMatrix& SparseMatrix::perform_operation(void (*op)(double&,double), const 
 }
 
 /*
-    Все 4 нижестоящие функции - обёртки вокруг SparseMatrix::perform_operation()
+    Все 4 нижестоящие функции - обёртки вокруг SparseMatrixRowProxy::perform_operation()
 */
 SparseMatrix& SparseMatrix::operator+=(const SparseMatrix& rv) {
     return perform_operation([](double &lv, double rv_) {lv += rv_;}, rv);
@@ -231,88 +247,66 @@ bool SparseMatrix::operator!=(const SparseMatrix& rv) const {
     return true;
 }
 
-SparseMatrixProxy::SparseMatrixProxy(SparseMatrix *m_, size_t row_, bool deref_, bool modifyable_) {
-    m = srcm;
-    row = row_;
+SparseMatrixRow::SparseMatrixRow(SparseMatrix *um, size_t urow, bool umodifyable) {
+    m = um;
+    m->row = 0;
     column = 0;
-    node = NULL;
-    deref = deref_;
-    modifyable = modifyable_;
-    added = 0;
+    row = urow;
+    node = nullptr;
+    modifyable = umodifyable;
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator+(size_t rv) {
-    if (deref == false) {
-        row += rv;
-    } else if (node == NULL) {
-        column += rv;
-    } else {
-        added += rv;
-    }
+SparseMatrixRow& SparseMatrixRow::operator+(size_t rv) {
+    column += rv;
     return *this;
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator-(size_t rv) {
-    if (deref == false) {
-        row -= rv;
-    } else if (node == NULL) {
-        column -= rv;
-    } else {
-        added -= rv;
-    }
+SparseMatrixRow& SparseMatrixRow::operator-(size_t rv) {
+    column -= rv;
     return *this;
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator[](size_t i) {
-    if (deref == false) {
-        row += i;
-        if (row >= m->height) {
-            throw std::out_of_range("SparseMatrixProxy::operator[] : out of bounds exception(height exceeded)");
-        }
-        deref = true;
-    } else if (node == NULL) {
-        column += i;
-        if (column >= m->width) {
-            throw std::out_of_range("SparseMatrixProxy::operator[] : out of bounds exception(width exceeded)");
-        }
-        node = m->tree.get_node(MatrixIndex(row, column));
-    } else {
-        throw std::logic_error("SparseMatrixProxy::operator[] : could not dereference value");
+SparseMatrixRowProxy SparseMatrixRow::operator[](size_t ucolumn) {
+    column += ucolumn;
+    if (column >= m->width) {
+        throw std::out_of_range("SparseMatrixRow::operator[] : out of bounds exception(width exceeded)");
     }
-    return *this;
+    node = m->tree.get_node(MatrixIndex(row, column));
+    return SparseMatrixRowProxy(this);
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator*() {
-    try {
-        return this->operator[](0);
-    } catch(std::logic_error&) {
-        throw std::logic_error("SparseMatrixProxy::operator* : could not dereference value");
+SparseMatrixRowProxy SparseMatrixRow::operator*() {
+     if (column >= m->width) {
+        throw std::out_of_range("SparseMatrixRow::operator* : out of bounds exception(width exceeded)");
     }
+    node = m->tree.get_node(MatrixIndex(row, column));
+    return SparseMatrixRowProxy(this);
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator=(double val) {
-    if (node == NULL) {
-        throw std::logic_error("SparseMatrixProxy::operator= : lvalue could not be assigned")
+SparseMatrixRowProxy::SparseMatrixRowProxy(SparseMatrixRow *ureal) {
+    real = ureal;
+}
+
+SparseMatrixRowProxy& SparseMatrixRowProxy::operator=(double val) {
+    if (real->modifyable == false) {
+        throw std::runtime_error("SparseMatrixRowProxy::operator= : constant instance could not be modified");
     }
-    if (modifyable == false) {
-        throw std::logic_error("SparseMatrixRowProxy::operator= : constant instance could not be modified");
-    }
-    if (node == Node<MatrixIndex,double>::nil_node) {
+    if (real->node == Node<MatrixIndex,double>::nil_node) {
         if (fabs(val - 0.0) > SparseMatrix::eps) {
-            node = m->tree.insert(MatrixIndex(row, column), val);
+            real->node = real->m->tree.insert(MatrixIndex(real->row, real->column), val);
         }
     } else {
         if (fabs(val - 0.0) > SparseMatrix::eps) {
-            node->item = val;
+            real->node->item = val;
         } else {
-            m->tree.remove(real->node);
-            node = Node<MatrixIndex,double>::nil_node;
+            real->m->tree.remove(real->node);
+            real->node = Node<MatrixIndex,double>::nil_node;
         }
     }
     return *this;
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator=(const SparseMatrixProxy& rv) {
+SparseMatrixRowProxy& SparseMatrixRowProxy::operator=(const SparseMatrixRowProxy& rv) {
     if (this == &rv) {
         return *this;
     }
@@ -320,35 +314,32 @@ SparseMatrixProxy& SparseMatrixProxy::operator=(const SparseMatrixProxy& rv) {
 }
 
 SparseMatrixRowProxy::operator double() const {
-    if (node == NULL) {
-        throw std::logic_error("SparseMatrixRowProxy::operator double() : could not convert to double")
+    if (real->node == Node<MatrixIndex,double>::nil_node) {
+        return 0.0;
     }
-    if (node == Node<MatrixIndex,double>::nil_node) {
-        return 0.0 + (ssize_t)added;
-    }
-    return real->node->item + (ssize_t)added;
+    return real->node->item;
 }
 
 /*
     Выполнить операцию вида <op>=rv
 */
-SparseMatrixProxy& SparseMatrixProxy::perform_operation(void (*op)(double&,double), double rv) {
-    bool node_exist = (node != Node<MatrixIndex,double>::nil_node);
-    double tmp = (node_exist ? node->item : 0.0);
+SparseMatrixRowProxy& SparseMatrixRowProxy::perform_operation(void (*op)(double&,double), double rv) {
+    bool node_exist = (real->node != Node<MatrixIndex,double>::nil_node);
+    double tmp = (node_exist ? real->node->item : 0.0);
 
-    if (modifyable == false) {
-        throw std::runtime_error("SparseMatrixProxy::perform_operation : constant instance could not be modified");
+    if (real->modifyable == false) {
+        throw std::runtime_error("SparseMatrixRowProxy::perform_operation : constant instance could not be modified");
     }
     op(tmp, rv);
     if (fabs(tmp - 0.0) > SparseMatrix::eps) {
         if (node_exist) {
-            node->item = tmp;
+            real->node->item = tmp;
         } else {
-            node = m->tree.insert(MatrixIndex(row, column), tmp);
+            real->node = real->m->tree.insert(MatrixIndex(real->row, real->column), tmp);
         }
     } else if (node_exist) {
-        m->tree.remove(node);
-        node = Node<MatrixIndex,double>::nil_node;
+        real->m->tree.remove(real->node);
+        real->node = Node<MatrixIndex,double>::nil_node;
     }
     return *this;
 }
@@ -356,40 +347,40 @@ SparseMatrixProxy& SparseMatrixProxy::perform_operation(void (*op)(double&,doubl
 /*
     Все нижестоящие 4 функции - обёртки вокруг SparseMatrixRowProxy::perform_operation()
 */
-SparseMatrixProxy& SparseMatrixProxy::operator+=(double rv) {
+SparseMatrixRowProxy& SparseMatrixRowProxy::operator+=(double rv) {
     return perform_operation([](double &lv, double rv_) {lv += rv_;}, rv);
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator-=(double rv) {
+SparseMatrixRowProxy& SparseMatrixRowProxy::operator-=(double rv) {
     return perform_operation([](double &lv, double rv_) {lv -= rv_;}, rv);
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator*=(double rv) {
+SparseMatrixRowProxy& SparseMatrixRowProxy::operator*=(double rv) {
     return perform_operation([](double &lv, double rv_) {lv *= rv_;}, rv);
 }
 
-SparseMatrixProxy& SparseMatrixProxy::operator/=(double rv) {
+SparseMatrixRowProxy& SparseMatrixRowProxy::operator/=(double rv) {
     return perform_operation([](double &lv, double rv_) {lv /= rv_;}, rv);
 }
 
-bool SparseMatrixProxy::operator==(double rv) const {
+bool SparseMatrixRowProxy::operator==(double rv) const {
     return (fabs(operator double() - rv) < SparseMatrix::eps);
 }
 
-bool SparseMatrixProxy::operator==(SparseMatrixProxy& rv) const {
+bool SparseMatrixRowProxy::operator==(SparseMatrixRowProxy& rv) const {
     return (fabs(operator double() - double(rv)) < SparseMatrix::eps);
 }
 
-bool SparseMatrixProxy::operator!=(double rv) const {
+bool SparseMatrixRowProxy::operator!=(double rv) const {
     return (fabs(operator double() - rv) >= SparseMatrix::eps);
 }
 
-bool SparseMatrixProxy::operator!=(SparseMatrixProxy& rv) const {
+bool SparseMatrixRowProxy::operator!=(SparseMatrixRowProxy& rv) const {
     return (fabs(operator double() - double(rv)) >= SparseMatrix::eps);
 }
 
-SparseMatrixProxy& operator+(size_t lv, const SparseMatrixProxy& rv) {
-    return const_cast<SparseMatrixProxy&>(rv).operator+(lv);
+SparseMatrixRow& operator+(size_t lv, const SparseMatrixRow& rv) {
+    return const_cast<SparseMatrixRow&>(rv).operator+(lv);
 }
 
 SparseMatrix& operator+(size_t lv, SparseMatrix& rv) {
