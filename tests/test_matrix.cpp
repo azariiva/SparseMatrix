@@ -5,7 +5,7 @@
 int main() {
     SparseMatrix::set_precision(1e-6);
     SparseMatrix m(5, 5);
-
+    
     for (size_t i = 0; i < m.num_rows(); i++) {
         for (size_t j = 0; j < m.num_columns(); j++) {
             *((m + i)[0] + j) = ((*(m + j))[i] = i + j);
@@ -84,6 +84,6 @@ int main() {
     m = m;
     std::cout << '\n';
     std::cout << **m << '\n';
-    m.set(5, 1, 1.0);
+    // m.set(5, 1, 1.0);
     return 0;
 }
