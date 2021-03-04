@@ -17,6 +17,8 @@ class SparseMatrix
     size_t                      height; 
     size_t                      width;
 
+    void check_idx(size_t row) const;
+    
     friend Cell;
     public:
     static void set_precision(double);
@@ -48,7 +50,8 @@ class SparseMatrix
     ColumnSelector operator*() const;
 
     /*
-    ** Арифметические операции вида SparseMatrix.op(SparseMatrix)
+    ** Арифметические операции вида:
+    ** SparseMatrix.op(SparseMatrix)
     */
     SparseMatrix& perform_operation(void (*)(double&,double), const SparseMatrix&);
     SparseMatrix& operator+=(const SparseMatrix&);
@@ -56,8 +59,10 @@ class SparseMatrix
     SparseMatrix& operator*=(const SparseMatrix&);
     SparseMatrix& operator/=(const SparseMatrix&);
     SparseMatrix dot(const SparseMatrix&) const;
+
     /*
-    ** Арифметические операции вида SparseMatrix.op(double)
+    ** Арифметические операции вида:
+    ** SparseMatrix.op(double)
     */
     SparseMatrix& operator*=(double val);
     SparseMatrix& operator/=(double val);
@@ -118,9 +123,9 @@ protected:
 
     Selector(const SparseMatrix *, bool = true, size_t = 0);
 
-    friend const Selector<T_C>& operator+(const Selector<T_C>&, size_t);
-    friend const Selector<T_C>& operator+(size_t, const Selector<T_C>&);
-    friend const Selector<T_C>& operator-(const Selector<T_C>&, size_t);
+    friend const Selector& operator+ <T_C> (const Selector&, size_t);
+    friend const Selector& operator+ <T_C> (size_t, const Selector&);
+    friend const Selector& operator- <T_C> (const Selector&, size_t);
 public:
     virtual T_C     operator[](size_t) const = 0;
     virtual T_C     operator*() const = 0;
@@ -160,7 +165,7 @@ class Cell
     SparseMatrix * const                matrix;
     const MatrixIndex                   position;
     const bool                          mod;
-    Node<MatrixIndex,double> *          node
+    Node<MatrixIndex,double> *          node;
 
 public:
     Cell(const SparseMatrix *, size_t, size_t, bool);

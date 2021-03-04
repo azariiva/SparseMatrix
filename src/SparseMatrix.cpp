@@ -6,9 +6,14 @@
 double SparseMatrix::eps  = 1e-8;
 size_t SparseMatrix::instance_quantity = 0;
 
+void SparseMatrix::check_idx(size_t row) const {
+    if (row >= height) {
+        throw std::out_of_range("out of range");
+    }
+}
 void SparseMatrix::set_precision(double eps_) {
     if (SparseMatrix::instance_quantity != 0) {
-        throw std::runtime_error("SparseMatrix::set_precision : precision could not be modified when instances of SparseMatrix exist");
+        throw std::logic_error("SparseMatrix::set_precision : precision could not be modified when instances of SparseMatrix exist");
     } else {
         SparseMatrix::eps = eps_;
     }
@@ -18,15 +23,14 @@ double SparseMatrix::get_precision() {
     return SparseMatrix::eps;
 }
 
-SparseMatrix::SparseMatrix(size_t height_, size_t width_) {
-    height = height_;
-    width = width_;
+SparseMatrix::SparseMatrix(size_t height_, size_t width_) : height(height_), width(width_) {
+    if (height == 0 || width == 0) {
+        throw std::logic_error("Height and width of matrix could not be 0");
+    }
     SparseMatrix::instance_quantity++;
 }
 
-SparseMatrix::SparseMatrix(const SparseMatrix& src) : tree(src.tree) {
-    height = src.height;
-    width = src.width;
+SparseMatrix::SparseMatrix(const SparseMatrix& src) : tree(src.tree), height(src.height), width(src.width) {
     SparseMatrix::instance_quantity++;
 }
 
@@ -77,10 +81,12 @@ size_t SparseMatrix::num_columns() const {
 }
 
 ColumnSelector SparseMatrix::operator[](size_t row) {
+    check_idx(row);
     return ColumnSelector(this, row);
 }
 
 ColumnSelector SparseMatrix::operator[](size_t row) const {
+    check_idx(row);
     return ColumnSelector(this, row, false);
 }
 
@@ -265,7 +271,7 @@ const Selector<T_C>& operator-(const Selector<T_C>& lv, size_t rv) {
 RowSelector::RowSelector(const SparseMatrix* matrix_, bool mod_, size_t idx_) : Selector<ColumnSelector>(matrix_, mod_, idx_) {}
 
 void RowSelector::check_idx() const {
-    if (idx > matrix->num_columns()) {
+    if (idx >= matrix->num_columns()) {
         //TODO: rewrite error message
         throw std::out_of_range("out of range");
     }
@@ -285,7 +291,7 @@ ColumnSelector RowSelector::operator*() const {
 ColumnSelector::ColumnSelector(const SparseMatrix *matrix_, size_t row_, bool mod_, size_t idx_) : Selector<Cell>(matrix_, mod_, idx_), row(row_) {}
 
 void ColumnSelector::check_idx() const {
-    if (idx > matrix->num_columns()) {
+    if (idx >= matrix->num_columns()) {
         //TODO: rewrite error message
         throw std::out_of_range("out of range");
     }
@@ -346,7 +352,7 @@ Cell& Cell::perform_operation(void (*op)(double&,double), double rv) {
 
     if (mod == false) {
         // TODO: change error message
-        throw std::runtime_error("SparseMatrixRowProxy::perform_operation : constant instance could not be modified");
+        throw std::logic_error("SparseMatrixRowProxy::perform_operation : constant instance could not be modified");
     }
     op(tmp, rv);
     if (fabs(tmp - 0.0) > SparseMatrix::get_precision()) {
