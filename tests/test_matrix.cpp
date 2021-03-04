@@ -30,12 +30,12 @@ int main() {
             }
             std::cout << '\n';
         }
-    } catch (const std::runtime_error& e) {
+    } catch (const std::logic_error& e) {
         std::cerr << "Exception caught: " << e.what() << std::endl;
     }
     try {
         SparseMatrix::set_precision(1e-10);
-    } catch (const std::runtime_error& e) {
+    } catch (const std::logic_error& e) {
         std::cerr << "Exception caught: " << e.what() << std::endl;
     }
     try {
