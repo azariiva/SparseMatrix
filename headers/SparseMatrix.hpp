@@ -18,7 +18,7 @@ class SparseMatrix
     size_t                      width;
 
     void check_idx(size_t row) const;
-    
+
     friend Cell;
     public:
     static void set_precision(double);
@@ -142,10 +142,6 @@ public:
     virtual ColumnSelector  operator*() const;
 };
 
-// const RowSelector& operator+(const RowSelector&, size_t);
-// const RowSelector& operator+(size_t, const RowSelector&);
-// const RowSelector& operator-(const RowSelector&, size_t);
-
 class ColumnSelector : public Selector<Cell>
 {
     const size_t    row;
@@ -155,10 +151,6 @@ public:
     virtual Cell    operator[](size_t) const;
     virtual Cell    operator*() const;
 };
-
-// const ColumnSelector& operator+(const ColumnSelector&, size_t);
-// const ColumnSelector& operator+(size_t, const ColumnSelector&);
-// const ColumnSelector& operator-(const ColumnSelector&, size_t);
 
 class Cell
 {

@@ -11,6 +11,7 @@ void SparseMatrix::check_idx(size_t row) const {
         throw std::out_of_range("out of range");
     }
 }
+
 void SparseMatrix::set_precision(double eps_) {
     if (SparseMatrix::instance_quantity != 0) {
         throw std::logic_error("precision could not be modified when instances exist");
@@ -396,12 +397,12 @@ bool Cell::operator!=(Cell& rv) const {
     return (fabs(operator double() - double(rv)) >= SparseMatrix::get_precision());
 }
 
-template class Selector<Cell>;
 template class Selector<ColumnSelector>;
 template const Selector<ColumnSelector>& operator+(const Selector<ColumnSelector>&, size_t);
 template const Selector<ColumnSelector>& operator+(size_t, const Selector<ColumnSelector>&);
 template const Selector<ColumnSelector>& operator-(const Selector<ColumnSelector>&, size_t);
 
+template class Selector<Cell>;
 template const Selector<Cell>& operator+(const Selector<Cell>&, size_t);
 template const Selector<Cell>& operator+(size_t, const Selector<Cell>&);
 template const Selector<Cell>& operator-(const Selector<Cell>&, size_t);
