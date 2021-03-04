@@ -4,11 +4,9 @@
 #include "MatrixIndex.hpp"
 #include "RBTree.hpp"
 
-class SparseMatrixRowProxy;
-class SparseMatrixRow;
-
-class RowSelector;
+class Cell;
 class ColumnSelector;
+class RowSelector;
 
 class SparseMatrix
 {
@@ -19,11 +17,7 @@ class SparseMatrix
     size_t                      height; 
     size_t                      width;
 
-    friend RowSelector operator+(size_t, SparseMatrix&);
-    friend RowSelector operator+(size_t, const SparseMatrix&);
-    friend SparseMatrix operator*(double, const SparseMatrix&);
-    
-    friend ColumnSelector;
+    friend Cell;
     public:
     static void set_precision(double);
     static double get_precision();
@@ -33,23 +27,25 @@ class SparseMatrix
     ~SparseMatrix();
     SparseMatrix& operator=(const SparseMatrix&);
 
+    /*
+    ** Установка значений в ячейках матрицы
+    */
     double get(size_t, size_t) const;
     void set(size_t, size_t, double);
 
+    /*
+    ** Получение информационных полей
+    */
     size_t num_rows() const;
     size_t num_columns() const;
 
+    /*
+    ** Операции разыменования
+    */
     ColumnSelector operator[](size_t);
     ColumnSelector operator[](size_t) const;
     ColumnSelector operator*();
     ColumnSelector operator*() const;
-    RowSelector operator+(size_t);
-    RowSelector operator+(size_t) const;
-    RowSelector operator-(size_t);
-    RowSelector operator-(size_t) const;
-
-    bool operator==(const SparseMatrix&) const; // after indexation
-    bool operator!=(const SparseMatrix&) const; // after indexation
 
     /*
     ** Арифметические операции вида SparseMatrix.op(SparseMatrix)
@@ -59,75 +55,115 @@ class SparseMatrix
     SparseMatrix& operator-=(const SparseMatrix&);
     SparseMatrix& operator*=(const SparseMatrix&);
     SparseMatrix& operator/=(const SparseMatrix&);
-    SparseMatrix operator+(const SparseMatrix&) const;
-    SparseMatrix operator-(const SparseMatrix&) const;
-    SparseMatrix operator*(const SparseMatrix&) const;
-    SparseMatrix operator/(const SparseMatrix&) const;
     SparseMatrix dot(const SparseMatrix&) const;
-
     /*
     ** Арифметические операции вида SparseMatrix.op(double)
     */
     SparseMatrix& operator*=(double val);
     SparseMatrix& operator/=(double val);
-    SparseMatrix operator*(double val) const;
-    SparseMatrix operator/(double val) const;
 };
 
-template <class T_P, class T_C>
+/*
+** Логические операции
+*/
+bool operator==(const SparseMatrix&, const SparseMatrix&);
+bool operator!=(const SparseMatrix&, const SparseMatrix&);
+
+/*
+** Арифметические операции вида:
+** SparseMatrix (*) SparseMatrix
+*/
+SparseMatrix operator+(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix operator-(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix operator*(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix operator/(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix dot(const SparseMatrix&, const SparseMatrix&);
+
+/*
+** Арифметичесик операции вида:
+** SparseMatrix (*) double или  double (*) SparseMatrix
+*/
+SparseMatrix operator*(const SparseMatrix&, double);
+SparseMatrix operator*(double, const SparseMatrix&);
+SparseMatrix operator/(const SparseMatrix&, double);
+
+/*
+** Адресная арифметика
+*/
+RowSelector operator+(SparseMatrix&, size_t);
+RowSelector operator+(const SparseMatrix&, size_t);
+RowSelector operator+(size_t, SparseMatrix&);
+RowSelector operator+(size_t, const SparseMatrix&);
+RowSelector operator-(SparseMatrix&, size_t);
+RowSelector operator-(const SparseMatrix&, size_t);
+
+template <class T_C>
+class Selector;
+
+template <class T_C>
+const Selector<T_C>& operator+(const Selector<T_C>&, size_t);
+template <class T_C>
+const Selector<T_C>& operator+(size_t, const Selector<T_C>&);
+template <class T_C>
+const Selector<T_C>& operator-(const Selector<T_C>&, size_t);
+
+template <class T_C>
 class Selector
 {
     virtual inline void check_idx() const = 0;
 protected:
-    T_P      p;
-    bool    mod;
-    size_t  idx;
+    const SparseMatrix  *matrix;
+    const bool          mod;
+    size_t              idx;
 
-    Selector(T_P, bool = true, size_t = 0);
+    Selector(const SparseMatrix *, bool = true, size_t = 0);
 
-    friend const RowSelector& operator+(size_t lv, RowSelector& rv);
-    friend const ColumnSelector& operator+(size_t lv, const ColumnSelector& rv);
+    friend const Selector<T_C>& operator+(const Selector<T_C>&, size_t);
+    friend const Selector<T_C>& operator+(size_t, const Selector<T_C>&);
+    friend const Selector<T_C>& operator-(const Selector<T_C>&, size_t);
 public:
-    const Selector& operator+(size_t) const;
-    const Selector& operator-(size_t) const;
     virtual T_C     operator[](size_t) const = 0;
     virtual T_C     operator*() const = 0;
 };
 
-class ColumnSelector;
-
-class RowSelector : public Selector<SparseMatrix *, ColumnSelector>
+class RowSelector : public Selector<ColumnSelector>
 {
     virtual inline void check_idx() const;
 
     friend ColumnSelector;
 public:
-
-    RowSelector(SparseMatrix *, bool = true, size_t = 0);
+    explicit RowSelector(const SparseMatrix *, bool = true, size_t = 0);
     virtual ColumnSelector  operator[](size_t) const;
     virtual ColumnSelector  operator*() const;
 };
 
-class Cell;
+// const RowSelector& operator+(const RowSelector&, size_t);
+// const RowSelector& operator+(size_t, const RowSelector&);
+// const RowSelector& operator-(const RowSelector&, size_t);
 
-class ColumnSelector : public Selector<RowSelector, Cell>
+class ColumnSelector : public Selector<Cell>
 {
+    const size_t    row;
     virtual inline void check_idx() const;
 public:
-    ColumnSelector(RowSelector, bool = true, size_t = 0);
+    explicit ColumnSelector(const SparseMatrix *, size_t = 0, bool = true, size_t = 0);
     virtual Cell    operator[](size_t) const;
     virtual Cell    operator*() const;
 };
 
+// const ColumnSelector& operator+(const ColumnSelector&, size_t);
+// const ColumnSelector& operator+(size_t, const ColumnSelector&);
+// const ColumnSelector& operator-(const ColumnSelector&, size_t);
+
 class Cell
 {
-    Node<MatrixIndex,double>    *node;
-    MatrixIndex                 position;
-    bool                        mod;
-    RBTree<MatrixIndex,double>  &tree;
+    SparseMatrix * const                matrix;
+    const MatrixIndex                   position;
+    const bool                          mod;
+    Node<MatrixIndex,double> *          node
 
 public:
-    Cell(RBTree<MatrixIndex,double>&, size_t, size_t, bool);
+    Cell(const SparseMatrix *, size_t, size_t, bool);
 
     Cell& operator=(double);
     Cell& operator=(const Cell&);
