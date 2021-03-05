@@ -55,8 +55,8 @@ static Node<T_KEY,T_ITEM> *recursive_copy(const Node<T_KEY,T_ITEM> *src, Node<T_
         return Node<T_KEY,T_ITEM>::nil_node;
     }
     node = new Node<T_KEY,T_ITEM>(*src, p);
-    node->left = copy(src->left, node);
-    node->right = copy(src->right, node);
+    node->left = recursive_copy(src->left, node);
+    node->right = recursive_copy(src->right, node);
     return node;
 }
 
@@ -117,7 +117,7 @@ RBTree<T_KEY,T_ITEM>& RBTree<T_KEY,T_ITEM>::operator=(const RBTree& src) {
     if (root != nil_node) {
         delete_node(root);
     }
-    root = copy(src.root);
+    root = iterative_copy(src.root);
     return *this;
 }
 
