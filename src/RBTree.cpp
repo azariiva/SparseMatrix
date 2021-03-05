@@ -61,6 +61,7 @@ static Node<T_KEY, T_ITEM> *copy(const Node<T_KEY, T_ITEM> *src, Node<T_KEY, T_I
 }
 
 // Конструктор копирования RBTree
+// TODO: реализовать нерекурсивное копирование
 template <class T_KEY, class T_ITEM>
 RBTree<T_KEY, T_ITEM>::RBTree(const RBTree& tree) {
     root = copy(tree.root);
