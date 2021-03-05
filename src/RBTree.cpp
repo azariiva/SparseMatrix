@@ -66,6 +66,7 @@ RBTree<T_KEY, T_ITEM>::RBTree(const RBTree& tree) {
     root = copy(tree.root);
 }
 
+// TODO: реализовать нерекурсивное удаление дерева
 // Вспомогательная ф-ция для ~RBTree
 template <class T_KEY, class T_ITEM>
 static void delete_node(Node<T_KEY, T_ITEM> *node) {
