@@ -55,7 +55,13 @@ int main() {
         std::cout << ((1 + mmm[i] + i - 2)[1] -= 9) << ' ';
     }
     std::cout << "\n\n";
-
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            std::cout << mmm[i][j] << ' ';
+        }
+        std::cout << '\n';
+    }
+    std::cout << '\n';
     mmm = (mmm *= 2) * (mmm  /= 2);
     for (size_t i = 0; i < mmm.num_columns(); i++) {
         for (size_t j = 0; j < mmm.num_rows(); j++) {

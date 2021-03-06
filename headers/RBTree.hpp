@@ -24,7 +24,7 @@ struct Node
     Node(const T_KEY&, const T_ITEM&, bool = red);
     Node(const Node&, Node * = nil_node);
     void run();
-    private:
+    //private:
     Node();
 };
 

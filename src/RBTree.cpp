@@ -19,7 +19,11 @@ Node<T_KEY, T_ITEM>::Node() {
 
 // Лист в о-сти видимости Node
 template <class T_KEY, class T_ITEM>
-Node<T_KEY, T_ITEM> *const Node<T_KEY, T_ITEM>::nil_node = new Node();
+static Node<T_KEY, T_ITEM> nil_node_ = Node<T_KEY,T_ITEM>();
+
+// Лист в о-сти видимости Node
+template <class T_KEY, class T_ITEM>
+Node<T_KEY, T_ITEM> *const Node<T_KEY, T_ITEM>::nil_node = &nil_node_<T_KEY,T_ITEM>;
 
 // Конструктор для создания новых Node
 template <class T_KEY, class T_ITEM>
@@ -387,10 +391,8 @@ void Node<T_KEY, T_ITEM>::run() {
 template <class T_KEY, class T_ITEM>
 void RBTree<T_KEY, T_ITEM>::run() {
     root->run();
-} 
+}
 
 template class RBTree<size_t, int>;
-
 #include "MatrixIndex.hpp"
 template class RBTree<MatrixIndex, double>;
-template class Node<MatrixIndex, double>;
