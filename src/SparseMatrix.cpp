@@ -167,7 +167,7 @@ bool operator==(const SparseMatrix& lv, const SparseMatrix& rv) {
     }
     for (size_t row = 0; row < lv.num_rows(); row++) {
         for (size_t column = 0; column < lv.num_columns(); column++) {
-            if (lv.get(row, column) != rv.get(row, column)) {
+            if (fabs(lv.get(row, column) - rv.get(row, column)) > SparseMatrix::get_precision()) {
                 return false;
             }
         }
@@ -315,7 +315,7 @@ Cell& Cell::operator=(double rv) {
     if (mod == false) {
         throw std::logic_error("constant value could not be modified");
     }
-    if (node == Node<MatrixIndex,double>::nil_node) {
+    if (node == RBTree<MatrixIndex,double>::nil_node) {
         if (fabs(rv - 0.0) > SparseMatrix::get_precision()) {
             node = matrix->tree.insert(position, rv);
         }
@@ -324,14 +324,14 @@ Cell& Cell::operator=(double rv) {
             node->item = rv;
         } else {
             matrix->tree.remove(node);
-            node = Node<MatrixIndex,double>::nil_node;
+            node = RBTree<MatrixIndex,double>::nil_node;
         }
     }
     return *this;
 }
 
 Cell::operator double() const {
-    if (node == Node<MatrixIndex,double>::nil_node) {
+    if (node == RBTree<MatrixIndex,double>::nil_node) {
         return 0.0;
     }
     return node->item;
@@ -345,7 +345,7 @@ Cell& Cell::operator=(const Cell& rv) {
 }
 
 Cell& Cell::perform_operation(void (*op)(double&,double), double rv) {
-    bool node_exist = (node != Node<MatrixIndex,double>::nil_node);
+    bool node_exist = (node != RBTree<MatrixIndex,double>::nil_node);
     double tmp = (node_exist ? node->item : 0.0);
 
     if (mod == false) {
@@ -360,7 +360,7 @@ Cell& Cell::perform_operation(void (*op)(double&,double), double rv) {
         }
     } else if (node_exist) {
         matrix->tree.remove(node);
-        node = Node<MatrixIndex,double>::nil_node;
+        node = RBTree<MatrixIndex,double>::nil_node;
     }
     return *this;
 }
