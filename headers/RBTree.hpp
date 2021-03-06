@@ -1,5 +1,5 @@
-#ifndef RBTREE_HPP
-#define RBTREE_HPP
+#ifndef RB_TREE_HPP
+#define RB_TREE_HPP
 
 #include <ostream>
 #include <cstddef>

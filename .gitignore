@@ -1,2 +1,3 @@
-experiments
-a.out
+*.out
+*.a
+*.o

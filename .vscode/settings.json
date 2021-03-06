@@ -41,5 +41,6 @@
         "streambuf": "cpp",
         "ranges": "cpp",
         "cstring": "cpp"
-    }
+    },
+    "python.pythonPath": "/usr/bin/python3"
 }

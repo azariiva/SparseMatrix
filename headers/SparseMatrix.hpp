@@ -1,5 +1,5 @@
-#ifndef SPARSE_MATRIX_H
-#define SPARSE_MATRIX_H
+#ifndef SPARSE_MATRIX_HPP
+#define SPARSE_MATRIX_HPP
 
 #include "MatrixIndex.hpp"
 #include "RBTree.hpp"
@@ -154,7 +154,7 @@ public:
 
 class Cell
 {
-    SparseMatrix * const                matrix;
+    RBTree<MatrixIndex,double>&         tree;
     const MatrixIndex                   position;
     const bool                          mod;
     Node<MatrixIndex,double> *          node;

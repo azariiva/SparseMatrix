@@ -167,7 +167,7 @@ bool operator==(const SparseMatrix& lv, const SparseMatrix& rv) {
     }
     for (size_t row = 0; row < lv.num_rows(); row++) {
         for (size_t column = 0; column < lv.num_columns(); column++) {
-            if (lv.get(row, column) != rv.get(row, column)) {
+            if ((lv.get(row, column) - rv.get(row, column)) <= SparseMatrix::get_precision()) {
                 return false;
             }
         }
@@ -208,7 +208,7 @@ SparseMatrix dot(const SparseMatrix& lv, const SparseMatrix& rv) {
 }
 
 SparseMatrix operator*(const SparseMatrix& lv, double rv) {
-    if (fabs(rv - 0.0) < SparseMatrix::get_precision()) {
+    if (fabs(rv - 0.0) <= SparseMatrix::get_precision()) {
         return SparseMatrix(lv.num_rows(), lv.num_columns());
     }
     SparseMatrix result(lv);
@@ -307,8 +307,8 @@ Cell ColumnSelector::operator*() const {
     return Cell(matrix, row, idx, mod);
 }
 
-Cell::Cell(const SparseMatrix *matrix_, size_t row, size_t column, bool mod_) : matrix(const_cast<SparseMatrix *>(matrix_)), position(row, column), mod(mod_) {
-    node = matrix->tree.get_node(position);
+Cell::Cell(const SparseMatrix *matrix_, size_t row, size_t column, bool mod_) : tree(const_cast<SparseMatrix *>(matrix_)->tree), position(row, column), mod(mod_) {
+    node = tree.get_node(position);
 }
 
 Cell& Cell::operator=(double rv) {
@@ -317,13 +317,13 @@ Cell& Cell::operator=(double rv) {
     }
     if (node == Node<MatrixIndex,double>::nil_node) {
         if (fabs(rv - 0.0) > SparseMatrix::get_precision()) {
-            node = matrix->tree.insert(position, rv);
+            node = tree.insert(position, rv);
         }
     } else {
         if (fabs(rv - 0.0) > SparseMatrix::get_precision()) {
             node->item = rv;
         } else {
-            matrix->tree.remove(node);
+            tree.remove(node);
             node = Node<MatrixIndex,double>::nil_node;
         }
     }
@@ -356,10 +356,10 @@ Cell& Cell::perform_operation(void (*op)(double&,double), double rv) {
         if (node_exist) {
             node->item = tmp;
         } else {
-            node = matrix->tree.insert(position, tmp);
+            node = tree.insert(position, tmp);
         }
     } else if (node_exist) {
-        matrix->tree.remove(node);
+        tree.remove(node);
         node = Node<MatrixIndex,double>::nil_node;
     }
     return *this;
@@ -382,19 +382,19 @@ Cell& Cell::operator/=(double rv) {
 }
 
 bool Cell::operator==(double rv) const {
-    return (fabs(operator double() - rv) < SparseMatrix::get_precision());
+    return (fabs(operator double() - rv) <= SparseMatrix::get_precision());
 }
 
 bool Cell::operator==(Cell& rv) const {
-    return (fabs(operator double() - double(rv)) < SparseMatrix::get_precision());
+    return (fabs(operator double() - double(rv)) <= SparseMatrix::get_precision());
 }
 
 bool Cell::operator!=(double rv) const {
-    return (fabs(operator double() - rv) >= SparseMatrix::get_precision());
+    return (fabs(operator double() - rv) > SparseMatrix::get_precision());
 }
 
 bool Cell::operator!=(Cell& rv) const {
-    return (fabs(operator double() - double(rv)) >= SparseMatrix::get_precision());
+    return (fabs(operator double() - double(rv)) > SparseMatrix::get_precision());
 }
 
 template class Selector<ColumnSelector>;

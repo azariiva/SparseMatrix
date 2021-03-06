@@ -21,6 +21,7 @@ obj/%.o: src/%.cpp $(HPPFILES)
 libSparseMatrix.a: $(OFILES)
 	@ar rc $@ $(OFILES)
 	@ranlib $@
+	@echo "$@ compiled"
 
 clean:
 	rm -rf obj
