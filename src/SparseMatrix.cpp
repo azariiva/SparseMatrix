@@ -360,7 +360,7 @@ Cell& Cell::perform_operation(void (*op)(double&,double), double rv) {
         }
     } else if (node_exist) {
         tree.remove(node);
-        node = Node<MatrixIndex,double>::nil_node;
+        node = RBTree<MatrixIndex,double>::nil_node;
     }
     return *this;
 }
