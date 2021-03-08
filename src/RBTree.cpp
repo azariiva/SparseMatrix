@@ -47,7 +47,7 @@ Node<T_KEY, T_ITEM> *const RBTree<T_KEY, T_ITEM>::nil_node = Node<T_KEY, T_ITEM>
 // Конструктор умолчания RBTree
 template <class T_KEY, class T_ITEM>
 RBTree<T_KEY, T_ITEM>::RBTree() {
-    root = RBTree<T_KEY, T_ITEM>::nil_node;
+    root = nil_node;
 }
 
 // Вспомогательная ф-ция для КК RBTree
