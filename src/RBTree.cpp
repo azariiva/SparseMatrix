@@ -21,7 +21,7 @@ Node<T_KEY, T_ITEM>::Node() {
 template <class T_KEY, class T_ITEM>
 static Node<T_KEY, T_ITEM> nil_node_ = Node<T_KEY,T_ITEM>();
 
-// Лист в о-сти видимости Node
+// Лист в о-сти видимости Node 
 template <class T_KEY, class T_ITEM>
 Node<T_KEY, T_ITEM> *const Node<T_KEY, T_ITEM>::nil_node = &nil_node_<T_KEY,T_ITEM>;
 

@@ -131,11 +131,9 @@ public:
     virtual T_C     operator*() const = 0;
 };
 
-class RowSelector : public Selector<ColumnSelector>
+class RowSelector : private Selector<ColumnSelector>
 {
     virtual inline void check_idx() const;
-
-    friend ColumnSelector;
 public:
     explicit RowSelector(const SparseMatrix *, bool = true, size_t = 0);
     virtual ColumnSelector  operator[](size_t) const;
@@ -147,7 +145,7 @@ class ColumnSelector : public Selector<Cell>
     const size_t    row;
     virtual inline void check_idx() const;
 public:
-    explicit ColumnSelector(const SparseMatrix *, size_t = 0, bool = true, size_t = 0);
+    explicit ColumnSelector(const SparseMatrix *, bool = true, size_t = 0);
     virtual Cell    operator[](size_t) const;
     virtual Cell    operator*() const;
 };

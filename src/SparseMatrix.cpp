@@ -83,12 +83,12 @@ size_t SparseMatrix::num_columns() const {
 
 ColumnSelector SparseMatrix::operator[](size_t row) {
     check_idx(row);
-    return ColumnSelector(this, row);
+    return ColumnSelector(this, true, row);
 }
 
 ColumnSelector SparseMatrix::operator[](size_t row) const {
     check_idx(row);
-    return ColumnSelector(this, row, false);
+    return ColumnSelector(this, false, row);
 }
 
 ColumnSelector SparseMatrix::operator*() {
@@ -96,7 +96,7 @@ ColumnSelector SparseMatrix::operator*() {
 }
 
 ColumnSelector SparseMatrix::operator*() const {
-    return ColumnSelector(this, 0, false);
+    return ColumnSelector(this, false);
 }
 
 SparseMatrix& SparseMatrix::perform_operation(void (*op)(double&,double), const SparseMatrix&rv) {
@@ -280,15 +280,15 @@ void RowSelector::check_idx() const {
 ColumnSelector RowSelector::operator[](size_t i) const {
     const_cast<RowSelector *>(this)->idx += i;
     check_idx();
-    return ColumnSelector(matrix, idx, mod);
+    return ColumnSelector(matrix, mod, idx);
 }
 
 ColumnSelector RowSelector::operator*() const {
     check_idx();
-    return ColumnSelector(matrix, idx, mod);
+    return ColumnSelector(matrix, mod, idx);
 }
 
-ColumnSelector::ColumnSelector(const SparseMatrix *matrix_, size_t row_, bool mod_, size_t idx_) : Selector<Cell>(matrix_, mod_, idx_), row(row_) {}
+ColumnSelector::ColumnSelector(const SparseMatrix *matrix_, bool mod_, size_t row_) : Selector<Cell>(matrix_, mod_), row(row_) {}
 
 void ColumnSelector::check_idx() const {
     if (idx >= matrix->num_columns()) {
