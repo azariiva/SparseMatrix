@@ -52,18 +52,28 @@ RBTree<T_KEY, T_ITEM>::RBTree() {
 
 // Вспомогательная ф-ция для КК RBTree
 template <class T_KEY, class T_ITEM>
-static Node<T_KEY, T_ITEM> *copy(const Node<T_KEY, T_ITEM> *src, Node<T_KEY, T_ITEM> *p=Node<T_KEY, T_ITEM>::nil_node) {
-    Node<T_KEY, T_ITEM> *node;
+static Node<T_KEY,T_ITEM> *copy(const Node<T_KEY,T_ITEM> *src) {
+    Node<T_KEY,T_ITEM> *root;
+    Node<T_KEY,T_ITEM> *dst;
 
-    if (src == Node<T_KEY, T_ITEM>::nil_node) {
-        return Node<T_KEY, T_ITEM>::nil_node;
+    if (src == Node<T_KEY,T_ITEM>::nil_node) {
+        return Node<T_KEY,T_ITEM>::nil_node;
     }
-    node = new Node<T_KEY, T_ITEM>(*src, p);
-    node->left = copy(src->left, node);
-    node->right = copy(src->right, node);
-    return node;
+    dst = root = new Node<T_KEY,T_ITEM>(*src, Node<T_KEY,T_ITEM>::nil_node);
+    while (src != Node<T_KEY,T_ITEM>::nil_node) {
+        if (src->left != Node<T_KEY,T_ITEM>::nil_node && dst->left == Node<T_KEY,T_ITEM>::nil_node) {
+            dst = dst->left = new Node<T_KEY,T_ITEM>(*(src->left), dst);
+            src = src->left;
+        } else if (src->right != Node<T_KEY,T_ITEM>::nil_node && dst->right == Node<T_KEY,T_ITEM>::nil_node) {
+            dst = dst->right = new Node<T_KEY,T_ITEM>(*(src->right), dst);
+            src = src->right;
+        } else {
+            dst = dst->p;
+            src = src->p;
+        }
+    }
+    return root;
 }
-
 // Конструктор копирования RBTree
 template <class T_KEY, class T_ITEM>
 RBTree<T_KEY, T_ITEM>::RBTree(const RBTree& tree) {
