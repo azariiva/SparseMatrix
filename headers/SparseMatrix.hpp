@@ -3,6 +3,8 @@
 
 #include "MatrixIndex.hpp"
 #include "RBTree.hpp"
+#include <stdexcept>
+#include <new>
 
 class Cell;
 class ColumnSelector;
@@ -17,100 +19,100 @@ class SparseMatrix
     size_t                      height; 
     size_t                      width;
 
-    void check_idx(size_t row) const;
+    void check_idx(size_t row) const throw(std::out_of_range);
 
     friend Cell;
     public:
-    static void set_precision(double);
-    static double get_precision();
+    static void set_precision(double) throw(std::logic_error);
+    static double get_precision() throw();
 
-    SparseMatrix(size_t, size_t);
-    SparseMatrix(const SparseMatrix&);
-    ~SparseMatrix();
-    SparseMatrix& operator=(const SparseMatrix&);
+    SparseMatrix(size_t, size_t) throw(std::logic_error);
+    SparseMatrix(const SparseMatrix&) throw(std::bad_alloc);
+    ~SparseMatrix() throw();
+    SparseMatrix& operator=(const SparseMatrix&) throw(std::bad_alloc);
 
     /*
     ** Установка значений в ячейках матрицы
     */
-    double get(size_t, size_t) const;
-    void set(size_t, size_t, double);
+    double get(size_t, size_t) const throw(std::out_of_range);
+    void set(size_t, size_t, double) throw(std::out_of_range, std::bad_alloc);
 
     /*
     ** Получение информационных полей
     */
-    size_t num_rows() const;
-    size_t num_columns() const;
+    size_t num_rows() const throw();
+    size_t num_columns() const throw();
 
     /*
     ** Операции разыменования
     */
-    ColumnSelector operator[](size_t);
-    ColumnSelector operator[](size_t) const;
-    ColumnSelector operator*();
-    ColumnSelector operator*() const;
+    ColumnSelector operator[](size_t) throw(std::out_of_range);
+    ColumnSelector operator[](size_t) const throw(std::out_of_range);
+    ColumnSelector operator*() throw();
+    ColumnSelector operator*() const throw();
 
     /*
     ** Арифметические операции вида:
     ** SparseMatrix.op(SparseMatrix)
     */
-    SparseMatrix& perform_operation(void (*)(double&,double), const SparseMatrix&);
-    SparseMatrix& operator+=(const SparseMatrix&);
-    SparseMatrix& operator-=(const SparseMatrix&);
-    SparseMatrix& operator*=(const SparseMatrix&);
-    SparseMatrix& operator/=(const SparseMatrix&);
-    SparseMatrix dot(const SparseMatrix&) const;
+    SparseMatrix& perform_operation(void (*)(double&,double), const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
+    SparseMatrix& operator+=(const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
+    SparseMatrix& operator-=(const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
+    SparseMatrix& operator*=(const SparseMatrix&) throw(std::invalid_argument);
+    SparseMatrix& operator/=(const SparseMatrix&) throw(std::invalid_argument);
+    SparseMatrix dot(const SparseMatrix&) const throw(std::invalid_argument, std::bad_alloc);
 
     /*
     ** Арифметические операции вида:
     ** SparseMatrix.op(double)
     */
-    SparseMatrix& operator*=(double val);
-    SparseMatrix& operator/=(double val);
+    SparseMatrix& operator*=(double val) throw();
+    SparseMatrix& operator/=(double val) throw(std::domain_error);
 };
 
 /*
 ** Логические операции
 */
-bool operator==(const SparseMatrix&, const SparseMatrix&);
-bool operator!=(const SparseMatrix&, const SparseMatrix&);
+bool operator==(const SparseMatrix&, const SparseMatrix&) throw();
+bool operator!=(const SparseMatrix&, const SparseMatrix&) throw();
 
 /*
 ** Арифметические операции вида:
 ** SparseMatrix (*) SparseMatrix
 */
-SparseMatrix operator+(const SparseMatrix&, const SparseMatrix&);
-SparseMatrix operator-(const SparseMatrix&, const SparseMatrix&);
-SparseMatrix operator*(const SparseMatrix&, const SparseMatrix&);
-SparseMatrix operator/(const SparseMatrix&, const SparseMatrix&);
-SparseMatrix dot(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix operator+(const SparseMatrix&, const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
+SparseMatrix operator-(const SparseMatrix&, const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
+SparseMatrix operator*(const SparseMatrix&, const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
+SparseMatrix operator/(const SparseMatrix&, const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
+SparseMatrix dot(const SparseMatrix&, const SparseMatrix&) throw(std::invalid_argument, std::bad_alloc);
 
 /*
 ** Арифметичесик операции вида:
 ** SparseMatrix (*) double или  double (*) SparseMatrix
 */
-SparseMatrix operator*(const SparseMatrix&, double);
-SparseMatrix operator*(double, const SparseMatrix&);
-SparseMatrix operator/(const SparseMatrix&, double);
+SparseMatrix operator*(const SparseMatrix&, double) throw(std::bad_alloc);
+SparseMatrix operator*(double, const SparseMatrix&) throw(std::bad_alloc);
+SparseMatrix operator/(const SparseMatrix&, double) throw(std::domain_error, std::bad_alloc);
 
 /*
 ** Адресная арифметика
 */
-RowSelector operator+(SparseMatrix&, size_t);
-RowSelector operator+(const SparseMatrix&, size_t);
-RowSelector operator+(size_t, SparseMatrix&);
-RowSelector operator+(size_t, const SparseMatrix&);
-RowSelector operator-(SparseMatrix&, size_t);
-RowSelector operator-(const SparseMatrix&, size_t);
+RowSelector operator+(SparseMatrix&, size_t) throw();
+RowSelector operator+(const SparseMatrix&, size_t) throw();
+RowSelector operator+(size_t, SparseMatrix&) throw();
+RowSelector operator+(size_t, const SparseMatrix&) throw();
+RowSelector operator-(SparseMatrix&, size_t) throw();
+RowSelector operator-(const SparseMatrix&, size_t) throw();
 
 template <class T_C>
 class Selector;
 
 template <class T_C>
-const Selector<T_C>& operator+(const Selector<T_C>&, size_t);
+const Selector<T_C>& operator+(const Selector<T_C>&, size_t) throw();
 template <class T_C>
-const Selector<T_C>& operator+(size_t, const Selector<T_C>&);
+const Selector<T_C>& operator+(size_t, const Selector<T_C>&) throw();
 template <class T_C>
-const Selector<T_C>& operator-(const Selector<T_C>&, size_t);
+const Selector<T_C>& operator-(const Selector<T_C>&, size_t) throw();
 
 template <class T_C>
 class Selector
@@ -121,7 +123,7 @@ protected:
     const bool          mod;
     size_t              idx;
 
-    Selector(const SparseMatrix *, bool = true, size_t = 0);
+    explicit Selector(const SparseMatrix *, bool = true, size_t = 0);
 
     friend const Selector& operator+ <T_C> (const Selector&, size_t);
     friend const Selector& operator+ <T_C> (size_t, const Selector&);
@@ -133,21 +135,21 @@ public:
 
 class RowSelector : private Selector<ColumnSelector>
 {
-    virtual inline void check_idx() const;
+    virtual inline void check_idx() const throw(std::out_of_range);
 public:
-    explicit RowSelector(const SparseMatrix *, bool = true, size_t = 0);
-    virtual ColumnSelector  operator[](size_t) const;
-    virtual ColumnSelector  operator*() const;
+    explicit RowSelector(const SparseMatrix *, bool = true, size_t = 0) throw();
+    virtual ColumnSelector  operator[](size_t) const throw(std::out_of_range);
+    virtual ColumnSelector  operator*() const throw(std::out_of_range);
 };
 
 class ColumnSelector : public Selector<Cell>
 {
     const size_t    row;
-    virtual inline void check_idx() const;
+    virtual inline void check_idx() const throw(std::out_of_range);
 public:
-    explicit ColumnSelector(const SparseMatrix *, bool = true, size_t = 0);
-    virtual Cell    operator[](size_t) const;
-    virtual Cell    operator*() const;
+    explicit ColumnSelector(const SparseMatrix *, bool = true, size_t = 0) throw();
+    virtual Cell    operator[](size_t) const throw(std::out_of_range);
+    virtual Cell    operator*() const throw(std::out_of_range);
 };
 
 class Cell
@@ -158,21 +160,21 @@ class Cell
     Node<MatrixIndex,double> *          node;
 
 public:
-    Cell(const SparseMatrix *, size_t, size_t, bool);
+    Cell(const SparseMatrix *, size_t, size_t, bool) throw();
 
-    Cell& operator=(double);
-    Cell& operator=(const Cell&);
+    Cell& operator=(double) throw(std::logic_error);
+    Cell& operator=(const Cell&) throw(std::logic_error);
     
-    Cell& perform_operation(void (*)(double&,double), double);
-    Cell& operator+=(double);
-    Cell& operator-=(double);
-    Cell& operator*=(double);
-    Cell& operator/=(double);
+    Cell& perform_operation(void (*)(double&,double), double) throw(std::logic_error, std::bad_alloc);
+    Cell& operator+=(double) throw(std::logic_error, std::bad_alloc);
+    Cell& operator-=(double) throw(std::logic_error, std::bad_alloc);
+    Cell& operator*=(double) throw(std::logic_error);
+    Cell& operator/=(double) throw(std::logic_error, std::domain_error);
 
-    bool operator==(double) const;
-    bool operator==(Cell&) const;
-    bool operator!=(double) const;
-    bool operator!=(Cell&) const;
+    bool operator==(double) const throw();
+    bool operator==(Cell&) const throw();
+    bool operator!=(double) const throw();
+    bool operator!=(Cell&) const throw();
 
     operator double() const;
 };

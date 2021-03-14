@@ -48,6 +48,16 @@ int main() {
     } catch (const std::out_of_range& e) {
         std::cerr << "Exception caught: " << e.what() << std::endl;
     }
+    try {
+        m /= SparseMatrix::get_precision();
+    } catch (const std::domain_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    try {
+        m[0][0] /= 0;
+    } catch (const std::domain_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
 
     SparseMatrix mmm(1,1);
     mmm = mm;
