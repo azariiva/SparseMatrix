@@ -133,7 +133,7 @@ public:
     virtual T_C     operator*() const = 0;
 };
 
-class RowSelector : private Selector<ColumnSelector>
+class RowSelector : public Selector<ColumnSelector>
 {
     virtual inline void check_idx() const throw(std::out_of_range);
 public:

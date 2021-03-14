@@ -8,7 +8,7 @@ int main() {
     
     for (size_t i = 0; i < m.num_rows(); i++) {
         for (size_t j = 0; j < m.num_columns(); j++) {
-            *((m + i)[0] + j) = ((*(m + j))[i] = i + j);
+            *((2 + m + i - 2)[0] + j) = ((*(1 + m + j - 1))[i] = i + j);
         }
     }
 
